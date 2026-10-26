@@ -4,6 +4,9 @@ import { notifyPaymentApproved, schedulePostPurchaseEmails } from '../lib/send-n
 import { sendMetaEvent } from '../lib/meta-capi.js';
 import { sendWhatsApp } from '../lib/whatsapp.js';
 import { isValidOrderTotal } from '../lib/order-pricing.js';
+import {
+  STATEMENT_DESCRIPTOR, buildItems, buildPayerInfo, clientIp, paymentDescription,
+} from '../lib/mp-payment-info.js';
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -31,12 +34,12 @@ export default async function handler(req, res) {
       cardToken,
       saveCardToken,
       cardPaymentMethodId,
+      issuerId,
       installments,
       shippingMethod,
       shippingPrice,
       orderBumps,
       deviceId,
-      productName,
       productType,
     } = req.body;
 
@@ -90,59 +93,33 @@ export default async function handler(req, res) {
 
     const isPix = paymentMethodId === 'pix';
     const nameParts = customerName.trim().split(/\s+/);
-    const firstName  = nameParts[0];
-    const lastName   = nameParts.slice(1).join(' ') || firstName;
     const internalOrderId = randomUUID();
+    const type = productType || 'solar';
 
     // ── Montar pagamento Mercado Pago ──────────────────────
+    const { payer, additionalPayer, shipments, firstName, lastName } = buildPayerInfo({
+      name: customerName, email: customerEmail, cpf: cpfDigits, phone: customerPhone, address: customerAddress,
+    });
     const paymentBody = {
       transaction_amount: parsedTotal,
-      description: `${productName || 'Luminária Solar Solare'} — Kit ${quantity} unidades`,
+      description: paymentDescription(type, parsedQty),
       notification_url: `${process.env.SITE_URL}/api/mp-webhook`,
       external_reference: internalOrderId,
-      statement_descriptor: 'Solare Luminarias',
+      statement_descriptor: STATEMENT_DESCRIPTOR,
       additional_info: {
-        items: [{
-          id: 'solare-luminaria',
-          title: `Luminária Solar LED Solare — Kit ${parsedQty} unidades`,
-          description: 'Luminária solar LED recarregável, resistente à água, sem fio. Acende automaticamente à noite.',
-          category_id: 'home',
-          quantity: 1,
-          unit_price: parsedTotal,
-        }],
-        payer: {
-          first_name: firstName,
-          last_name:  lastName,
-          address: {
-            zip_code:      String(customerAddress?.cep || '').replace(/\D/g, ''),
-            street_name:   customerAddress?.street || customerAddress?.logradouro || '',
-            street_number: String(customerAddress?.number || customerAddress?.numero || ''),
-          },
-        },
-        shipments: {
-          receiver_address: {
-            zip_code:    String(customerAddress?.cep || '').replace(/\D/g, ''),
-            state_name:  customerAddress?.state || '',
-            city_name:   customerAddress?.city  || '',
-            street_name: customerAddress?.street || customerAddress?.logradouro || '',
-            street_number: String(customerAddress?.number || customerAddress?.numero || ''),
-          },
-        },
+        items: buildItems({
+          productType: type,
+          quantity:    parsedQty,
+          total:       parsedTotal,
+          bumps:       orderBumps || {},
+          bumpPrices:  BUMP_PRICES_SERVER,
+          bumpUnits:   type === 'led' ? 3 : 2,
+        }),
+        payer: additionalPayer,
+        shipments,
+        ip_address: clientIp(req),
       },
-      payer: {
-        email:      customerEmail.trim().toLowerCase(),
-        first_name: firstName,
-        last_name:  lastName,
-        identification: {
-          type:   'CPF',
-          number: cpfDigits,
-        },
-        address: {
-          zip_code:      String(customerAddress?.cep || '').replace(/\D/g, ''),
-          street_name:   customerAddress?.street || customerAddress?.logradouro || '',
-          street_number: String(customerAddress?.number || customerAddress?.numero || ''),
-        },
-      },
+      payer,
     };
 
     if (isPix) {
@@ -153,6 +130,7 @@ export default async function handler(req, res) {
       paymentBody.payment_method_id  = cardPaymentMethodId || 'visa';
       paymentBody.installments       = parseInt(installments) || 1;
       paymentBody.capture            = true;
+      if (issuerId) paymentBody.issuer_id = String(issuerId);
     }
 
     // ── Chamar API Mercado Pago ────────────────────────────
@@ -319,6 +297,7 @@ export default async function handler(req, res) {
     return res.status(200).json({
       success:         true,
       status:          paymentStatus,
+      status_detail:   mpResult.status_detail || null,
       id:              mpResult.id,
       orderId:         order?.id || null,
       qr_code:         isPix ? (mpResult.point_of_interaction?.transaction_data?.qr_code        ?? null) : null,

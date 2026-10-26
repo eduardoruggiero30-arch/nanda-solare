@@ -19,6 +19,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <title>Finalizar Compra — Solare</title>
     <script src="https://sdk.mercadopago.com/js/v2"></script>
+    <script src="https://www.mercadopago.com/v2/security.js" view="checkout"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -1549,9 +1550,76 @@
     }
 
     // ── INSTALLMENTS ──────────────────────────────────────
+    // Parcelas oficiais do Mercado Pago para o cartão digitado (pelo BIN).
+    // Sem BIN ainda, mostra a estimativa local abaixo.
+    let currentBin = '';
+    let currentIssuerId = null;
+    let installmentsReq = 0;
+    async function refreshInstallmentsFromMp() {
+        const sel = document.getElementById('card-installments');
+        if (!sel || currentBin.length < 6) return;
+        const reqId = ++installmentsReq;
+        try {
+            const mp = await getMpInstance();
+            const total = price + selectedShippingPrice + getBumpTotal();
+            const res = await mp.getInstallments({
+                amount: total.toFixed(2),
+                bin: currentBin,
+                paymentTypeId: 'credit_card',
+            });
+            if (reqId !== installmentsReq) return;
+            const opt0 = res?.[0];
+            const costs = opt0?.payer_costs || [];
+            if (!costs.length) return;
+            currentIssuerId = opt0.issuer?.id || null;
+            const prev = sel.value;
+            sel.innerHTML = '';
+            costs.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.installments;
+                opt.textContent = c.recommended_message || `${c.installments}x`;
+                sel.appendChild(opt);
+            });
+            if ([...sel.options].some(o => o.value === prev)) sel.value = prev;
+        } catch (_) { /* mantém a estimativa local */ }
+    }
+
+    // Mensagens para os motivos de recusa do Mercado Pago (status_detail)
+    const REJECTION_MESSAGES = {
+        cc_rejected_bad_filled_card_number:   'Confira o número do cartão.',
+        cc_rejected_bad_filled_date:          'Confira a data de vencimento do cartão.',
+        cc_rejected_bad_filled_security_code: 'Confira o código de segurança (CVV) do cartão.',
+        cc_rejected_bad_filled_other:         'Confira os dados do cartão.',
+        cc_rejected_blacklist:                'Não foi possível processar o pagamento com este cartão. Use outro cartão ou pague com Pix.',
+        cc_rejected_call_for_authorize:       'Seu banco precisa autorizar o pagamento. Ligue para o banco e tente de novo, ou pague com Pix.',
+        cc_rejected_card_disabled:            'O cartão não está ativo. Ligue para o banco para ativá-lo, ou use outro cartão.',
+        cc_rejected_card_error:               'Não foi possível processar o pagamento. Tente novamente ou use outro cartão.',
+        cc_rejected_duplicated_payment:       'Você já fez um pagamento com esse valor. Se precisar pagar de novo, use outro cartão ou Pix.',
+        cc_rejected_high_risk:                'O pagamento foi recusado por segurança. Use outro cartão ou pague com Pix.',
+        cc_rejected_insufficient_amount:      'O cartão não tem limite suficiente. Use outro cartão ou pague com Pix.',
+        cc_rejected_invalid_installments:     'O cartão não aceita esse número de parcelas. Escolha outra opção.',
+        cc_rejected_max_attempts:             'Você atingiu o limite de tentativas. Use outro cartão ou pague com Pix.',
+        cc_rejected_other_reason:             'O banco não aprovou o pagamento. Use outro cartão ou pague com Pix.',
+        cc_rejected_3ds_challenge:            'O pagamento não passou na verificação do banco. Tente outro cartão ou pague com Pix.',
+        cc_amount_rate_limit_exceeded:        'O cartão atingiu o limite de valor. Use outro cartão ou pague com Pix.',
+        pending_contingency:                  'Estamos processando o pagamento. Em até 2 dias úteis você recebe o resultado por e-mail.',
+        pending_review_manual:                'O pagamento está em análise. Em até 2 dias úteis você recebe o resultado por e-mail.',
+    };
+    function rejectionMessage(detail, fallback) {
+        return REJECTION_MESSAGES[detail] || fallback;
+    }
+
+    // Device ID do security.js do Mercado Pago (antifraude)
+    function getDeviceId() {
+        if (window.MP_DEVICE_SESSION_ID) return window.MP_DEVICE_SESSION_ID;
+        const muid = document.cookie.split(';').map(c => c.trim()).find(c => c.startsWith('muid='));
+        return muid ? muid.split('=')[1] || null : null;
+    }
+
     function populateInstallments() {
         const sel = document.getElementById('card-installments');
         if (!sel) return;
+        if (currentBin.length >= 6) { refreshInstallmentsFromMp(); return; }
         sel.innerHTML = '';
         const total = price + selectedShippingPrice + getBumpTotal();
         for (let i = 1; i <= 12; i++) {
@@ -1566,8 +1634,17 @@
     // ── CARD INPUT MASKS ──────────────────────────────────
     document.getElementById('card-number')?.addEventListener('input', function() {
         let v = this.value.replace(/\D/g, '').slice(0, 16);
+        const bin = v.slice(0, 6);
         v = v.replace(/(.{4})/g, '$1 ').trim();
         this.value = v;
+        if (bin.length === 6 && bin !== currentBin) {
+            currentBin = bin;
+            refreshInstallmentsFromMp();
+        } else if (bin.length < 6 && currentBin) {
+            currentBin = '';
+            currentIssuerId = null;
+            populateInstallments();
+        }
     });
     document.getElementById('card-expiry')?.addEventListener('input', function() {
         let v = this.value.replace(/\D/g, '').slice(0, 4);
@@ -1617,9 +1694,12 @@
             // Detectar bandeira pelo BIN
             const bin = number.slice(0, 6);
             let cardPaymentMethodId = 'visa';
+            let issuerId = currentIssuerId;
             try {
                 const pmData = await mp.getPaymentMethods({ bin });
-                if (pmData?.results?.[0]?.id) cardPaymentMethodId = pmData.results[0].id;
+                const pm = pmData?.results?.[0];
+                if (pm?.id) cardPaymentMethodId = pm.id;
+                if (!issuerId && pm?.issuer?.id) issuerId = pm.issuer.id;
             } catch (_) { /* usa visa como fallback */ }
 
             // Tokenizar cartão via SDK Mercado Pago
@@ -1671,6 +1751,8 @@
                     cardToken:           tokenResult.id,
                     saveCardToken:       saveCardToken,
                     cardPaymentMethodId: cardPaymentMethodId,
+                    issuerId:            issuerId,
+                    deviceId:            getDeviceId(),
                     installments:        installments,
                     shippingMethod:      selectedShippingName,
                     shippingPrice:       selectedShippingPrice,
@@ -1708,10 +1790,12 @@
                     'event_callback': function() { window.location.href = dest; }
                 });
                 setTimeout(function() { window.location.href = dest; }, 1500);
+            } else if (result.status === 'pending') {
+                alert(rejectionMessage(result.status_detail, 'Seu pagamento está em análise. Você recebe o resultado por e-mail.'));
+                window.location.href = `/obrigado.html?status=pending&id=${result.id}&type=card&total=${total}`;
             } else {
-                const reason = result.error || 'Verifique os dados ou o limite do cartão.';
                 console.error('Card payment declined:', result);
-                alert(`Pagamento recusado: ${reason}`);
+                alert(`Pagamento recusado.\n${rejectionMessage(result.status_detail, result.error || 'Verifique os dados ou o limite do cartão.')}`);
             }
         } catch (e) {
             console.error('Card payment error:', e);
@@ -1730,14 +1814,7 @@
             let deviceId = null;
             try {
                 await getMpInstance();
-                // security.js or SDK may expose the session ID on the window
-                deviceId = window.MP_DEVICE_SESSION_ID || null;
-                if (!deviceId) {
-                    const muidMatch = document.cookie.split(';')
-                        .map(c => c.trim())
-                        .find(c => c.startsWith('muid='));
-                    if (muidMatch) deviceId = muidMatch.split('=')[1] || null;
-                }
+                deviceId = getDeviceId();
             } catch (_) {}
 
             const res = await fetch('/api/process-payment', {

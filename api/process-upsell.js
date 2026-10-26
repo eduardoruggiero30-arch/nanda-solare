@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { notifyPaymentApproved } from '../lib/send-notification.js';
+import { STATEMENT_DESCRIPTOR, buildOfferItem, buildPayerInfo, clientIp } from '../lib/mp-payment-info.js';
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -10,15 +11,30 @@ const MP_BASE = 'https://api.mercadopago.com';
 
 // Preço decidido no servidor — nunca confiar em valor vindo do cliente
 const OFFER_PRICES = { upsell: 49.90, downsell: 39.90 };
+const OFFER_UNITS = 2; // upsell e downsell: +2 luminárias
 
-function buildPayer(order) {
+// payer, additional_info (item, comprador, entrega) e nome na fatura
+function buildPaymentInfo(order, req, offer, amount) {
+  const { payer, additionalPayer, shipments } = buildPayerInfo({
+    name:    order.customer_name,
+    email:   order.customer_email,
+    cpf:     order.customer_cpf,
+    phone:   order.customer_phone,
+    address: order.customer_address || {},
+  });
   return {
-    email: order.customer_email,
-    first_name: order.customer_name.split(' ')[0],
-    last_name: order.customer_name.split(' ').slice(1).join(' '),
-    identification: {
-      type: 'CPF',
-      number: order.customer_cpf?.replace(/\D/g, ''),
+    payer,
+    statement_descriptor: STATEMENT_DESCRIPTOR,
+    additional_info: {
+      items: buildOfferItem({
+        productType: order.customer_address?.productType || 'solar',
+        units: OFFER_UNITS,
+        price: amount,
+        offer,
+      }),
+      payer: additionalPayer,
+      shipments,
+      ip_address: clientIp(req),
     },
   };
 }
@@ -33,7 +49,7 @@ function buildUpsellOrder(order, orderId, offer, amount, mpResult, extra = {}) {
     customer_cpf: order.customer_cpf,
     customer_phone: order.customer_phone,
     customer_address: { ...order.customer_address, upsell: true, upsell_of: orderId, offer },
-    product_quantity: 2,
+    product_quantity: OFFER_UNITS,
     product_light_color: order.product_light_color,
     total_price: amount,
     payment_method: order.payment_method,
@@ -86,10 +102,10 @@ export default async function handler(req, res) {
     if (order.payment_method === 'pix') {
       const paymentData = {
         transaction_amount: upsellAmount,
-        description: `${offerLabel} — Kit 2 Luminárias Solar Solare`,
+        description: `${offerLabel} — Kit ${OFFER_UNITS} luminárias Nanda Solare`,
         payment_method_id: 'pix',
         date_of_expiration: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
-        payer: buildPayer(order),
+        ...buildPaymentInfo(order, req, offerName, upsellAmount),
         notification_url: `${process.env.SITE_URL}/api/mp-webhook`,
         external_reference: `upsell-${orderId}-${Date.now()}`,
       };
@@ -169,11 +185,12 @@ export default async function handler(req, res) {
 
     const paymentData = {
       transaction_amount: upsellAmount,
-      description: `${offerLabel} — Kit 2 Luminárias Solar Solare`,
+      description: `${offerLabel} — Kit ${OFFER_UNITS} luminárias Nanda Solare`,
       payment_method_id: savedCard.payment_method?.id || order.payment_method,
+      ...(savedCard.issuer?.id ? { issuer_id: String(savedCard.issuer.id) } : {}),
       installments: 1,
       token: cardTokenData.id,
-      payer: buildPayer(order),
+      ...buildPaymentInfo(order, req, offerName, upsellAmount),
       notification_url: `${process.env.SITE_URL}/api/mp-webhook`,
       external_reference: `upsell-${orderId}-${Date.now()}`,
     };

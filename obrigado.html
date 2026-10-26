@@ -220,6 +220,11 @@
         document.getElementById('status-icon').innerHTML = '<i class="fas fa-times-circle"></i>';
         document.getElementById('status-title').innerText = 'Pagamento Recusado';
         document.getElementById('status-desc').innerText = 'Não foi possível processar seu cartão. Tente novamente.';
+    } else if (type === 'card' && status === 'pending') {
+        document.getElementById('status-icon').className = 'icon pending';
+        document.getElementById('status-icon').innerHTML = '<i class="fas fa-clock"></i>';
+        document.getElementById('status-title').innerText = 'Pagamento em Análise';
+        document.getElementById('status-desc').innerText = 'O Mercado Pago está analisando seu pagamento. Você recebe o resultado por e-mail em até 2 dias úteis. Não é preciso pagar de novo.';
     }
 
     function startCountdown() {
