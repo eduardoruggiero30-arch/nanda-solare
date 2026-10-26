@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { fetchUpsells, orderUnits, unitsDetail } from '../lib/order-units.js';
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -43,8 +44,15 @@ export default async function handler(req, res) {
       );
     }
 
-    const { data: orders, count, error } = await ordersQ.range(offset, offset + pageSize - 1);
+    const { data: pageOrders, count, error } = await ordersQ.range(offset, offset + pageSize - 1);
     if (error) throw error;
+
+    // Total de luminárias por pedido (kit + bump + upsells)
+    const upsells = await fetchUpsells(supabase, pageOrders);
+    const orders = pageOrders.map(o => {
+      const units = orderUnits(o, upsells);
+      return { ...o, units: { ...units, detail: unitsDetail(units) } };
+    });
 
     // ── 2. Stats respeitando filtros de data/método/busca (sem status) ──
     let statsQ = supabase

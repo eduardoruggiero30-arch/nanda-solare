@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { fetchUpsells, orderUnits, unitsDetail } from '../lib/order-units.js';
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -33,6 +34,7 @@ function fmtAddress(addr) {
     const a = typeof addr === 'string' ? JSON.parse(addr) : addr;
     const parts = [];
     if (a.street)       parts.push(a.street + (a.number ? ', ' + a.number : ''));
+    if (a.complement)   parts.push('Compl.: ' + a.complement);
     if (a.neighborhood) parts.push(a.neighborhood);
     if (a.city)         parts.push(a.city + (a.state ? ' - ' + a.state : ''));
     if (a.cep)          parts.push('CEP: ' + a.cep);
@@ -96,13 +98,17 @@ export default async function handler(req, res) {
     const { data: orders, error } = await q;
     if (error) throw error;
 
+    const upsells = await fetchUpsells(supabase, orders);
+
     const headers = [
       'Data/Hora', 'Nome', 'E-mail', 'CPF', 'Telefone',
-      'Endereço', 'Produto', 'Qtd', 'Cor da Luz', 'Valor', 'Frete (Método)', 'Frete (Valor)',
+      'Endereço', 'Produto', 'Qtd Luminárias', 'Detalhe Qtd', 'Cor da Luz', 'Valor', 'Frete (Método)', 'Frete (Valor)',
       'Pagamento', 'Status', 'ID Mercado Pago', 'Feito', 'Rastreio'
     ];
 
-    const rows = orders.map(o => [
+    const rows = orders.map(o => {
+      const units = orderUnits(o, upsells);
+      return [
       fmtDate(o.created_at),
       o.customer_name || '',
       o.customer_email || '',
@@ -110,7 +116,8 @@ export default async function handler(req, res) {
       o.customer_phone || '',
       fmtAddress(o.customer_address),
       fmtProduct(o.customer_address),
-      o.product_quantity || '',
+      units.total || '',
+      unitsDetail(units),
       o.product_light_color || '',
       fmtPrice(o.total_price),
       o.shipping_method || '',
@@ -120,7 +127,8 @@ export default async function handler(req, res) {
       o.mp_payment_id || '',
       o.order_placed ? 'Sim' : 'Não',
       o.tracking_code || '',
-    ]);
+      ];
+    });
 
     // BOM para Excel abrir corretamente em PT-BR
     const bom = '﻿';
