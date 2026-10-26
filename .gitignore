@@ -1,0 +1,16 @@
+# Node modules
+node_modules/
+
+# Environment variables — NEVER commit these!
+.env
+.env.local
+.env.production
+
+# Vercel
+.vercel/
+
+# OS junk
+.DS_Store
+Thumbs.db
+.vercel
+.env*

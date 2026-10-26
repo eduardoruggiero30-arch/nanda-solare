@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<script>(function addScript() { var script = document.createElement("script"); script.src = "https://planweb.app/scripts/dist/stories-videos.js?licenseId=21539"; script.type = "text/javascript"; script.async = true; script.charset = "UTF-8"; document.head.appendChild(script); })();</script>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17714329725"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'AW-17714329725');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedido Confirmado — Solare</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Meta Pixel Code -->
+    <script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','878359704804021');fbq('track','PageView');</script>
+    <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=878359704804021&ev=PageView&noscript=1"/></noscript>
+    <!-- End Meta Pixel Code -->
+    <!-- TikTok Pixel Code -->
+    <script>!function(w,d,t){w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie","holdConsent","revokeConsent","grantConsent"],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e},ttq.load=function(e,n){var r="https://analytics.tiktok.com/i18n/pixel/events.js",o=n&&n.partner;ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=r,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};n=document.createElement("script");n.type="text/javascript",n.async=!0,n.src=r+"?sdkid="+e+"&lib="+t;e=document.getElementsByTagName("script")[0];e.parentNode.insertBefore(n,e)};ttq.load('D81PIDRC77UD0UBIK1I0');ttq.page()}(window,document,'ttq');</script>
+    <!-- End TikTok Pixel Code -->
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: #f5f7f5; display: flex; align-items: flex-start; justify-content: center; min-height: 100vh; padding: 12px; color: #1a1a1a; }
+        .card { background: white; border-radius: 16px; padding: 18px 20px; max-width: 460px; width: 100%; text-align: center; box-shadow: 0 4px 30px rgba(0,0,0,0.05); }
+
+        /* ── SOLARE LOGO ── */
+        .solare-logo { width: 220px; max-width: 80%; height: auto; margin: 0 auto 12px; display: block; }
+
+        .icon { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-size: 22px; }
+        .icon.success { background: #e8f5e9; color: #2e7d32; }
+        .icon.pending { background: #e8f5e9; color: #2e7d32; }
+        .icon.failure { background: #ffebee; color: #c62828; }
+
+        h1 { font-size: 18px; margin-bottom: 4px; }
+        p { color: #666; margin-bottom: 10px; line-height: 1.4; font-size: 13px; }
+
+        .pix-container { background: #f9fafb; border: 1px dashed #ddd; border-radius: 12px; padding: 14px; margin-bottom: 10px; }
+        .qr-code { width: 170px; height: 170px; margin: 0 auto 10px; }
+        .qr-code img { width: 100%; }
+        .copy-box { background: white; border: 1px solid #eee; padding: 8px; border-radius: 8px; font-size: 11px; word-break: break-all; margin-bottom: 8px; color: #333; }
+        .btn-copy { background: #1a1a1a; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; font-family: 'Inter', sans-serif; font-size: 14px; }
+        .btn-copy:active { opacity: 0.85; }
+
+        /* ── COUNTDOWN ── */
+        .urgency-banner {
+            background: transparent;
+            border: none;
+            padding: 6px 0;
+            margin-bottom: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+        .urgency-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: #1a1a1a;
+        }
+        .urgency-banner.critical .urgency-label { color: #dc2626; }
+        .countdown-display {
+            font-size: 26px;
+            font-weight: 800;
+            color: #1a1a1a;
+            letter-spacing: 2px;
+            line-height: 1;
+            font-variant-numeric: tabular-nums;
+        }
+        .urgency-banner.critical .countdown-display { color: #dc2626; }
+        .urgency-msg {
+            font-size: 11px;
+            color: #1a1a1a;
+            font-weight: 500;
+            line-height: 1.3;
+        }
+        .urgency-banner.critical .urgency-msg { color: #991b1b; font-weight: 600; }
+
+        /* ── MP SEAL ── */
+        .mp-seal {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-bottom: 8px;
+            font-size: 11px;
+            color: #6b7280;
+        }
+        .mp-seal img { height: 18px; }
+
+        /* ── EXPIRED ── */
+        .pix-expired-msg {
+            display: none;
+            background: #fff1f1;
+            border: 1.5px solid #ef4444;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .pix-expired-msg p { color: #dc2626; font-weight: 700; font-size: 13px; margin-bottom: 4px; }
+        .pix-expired-msg span { font-size: 11px; color: #7f1d1d; }
+
+        .btn-home { display: block; text-decoration: none; color: #2e7d32; font-weight: 700; border: 1px solid #2e7d32; padding: 10px; border-radius: 8px; transition: 0.2s; font-size: 13px; }
+        .btn-home:hover { background: #f1f8e9; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <img src="logo-solare.png" alt="Solare" class="solare-logo">
+    <div id="status-icon" class="icon success"><i class="fas fa-check-circle"></i></div>
+    <h1 id="status-title">Pagamento Confirmado!</h1>
+    <p id="status-desc">Obrigado pela sua compra. Sua Solare será enviada em breve.</p>
+
+    <!-- Pix Area -->
+    <div id="pix-area" style="display: none;">
+
+        <!-- Countdown Timer -->
+        <div class="urgency-banner" id="urgency-banner">
+            <span class="urgency-label">⚠️ Pague agora — código expirando</span>
+            <div class="countdown-display" id="countdown-display">10:00</div>
+            <span class="urgency-msg" id="urgency-msg">Finalize seu pagamento antes que o código Pix expire!</span>
+        </div>
+
+        <!-- MP Seal -->
+        <div class="mp-seal">
+            <span>Pagamento processado por</span>
+            <img src="/mp-logo.png" alt="Mercado Pago" style="height:44px;vertical-align:middle;margin-left:6px;">
+        </div>
+
+        <!-- Expired Message -->
+        <div class="pix-expired-msg" id="pix-expired-msg">
+            <p>⛔ Seu código Pix expirou!</p>
+            <span>Volte à loja e gere um novo Pix para concluir sua compra.</span>
+        </div>
+
+        <div class="pix-container">
+            <div class="qr-code">
+                <img id="qr-img" src="" alt="QR Code Pix">
+            </div>
+            <div class="copy-box" id="pix-code">Carregando código...</div>
+            <button class="btn-copy" onclick="copyPix()">COPIAR CÓDIGO PIX</button>
+        </div>
+        <p style="font-size: 13px;">O status será atualizado automaticamente após o pagamento.</p>
+    </div>
+
+    <a href="index.html" class="btn-home">Ir para página inicial</a>
+</div>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get('status');
+    const type = params.get('type');
+    const pixCode = params.get('qr_code');
+    const pixImg = params.get('qr_code_base64');
+    const paymentId = params.get('id');
+    const reminderId   = params.get('reminder_id')    || '';
+    const reminder2hId = params.get('reminder_2h_id') || '';
+    const reminder4hId = params.get('reminder_4h_id') || '';
+    const isUpsell = params.get('upsell') === 'true';
+    const orderId = params.get('orderId') || '';
+    const productType = params.get('product') || '';
+    const orderTotal = parseFloat(params.get('total') || '0');
+
+    // Pix: QR Code gerado — dispara apenas UMA vez por payment_id (evita redisparo em refresh)
+    if (type === 'pix' && status === 'pending' && paymentId) {
+        const pixKey = 'px_fired_' + paymentId;
+        if (!sessionStorage.getItem(pixKey)) {
+            sessionStorage.setItem(pixKey, '1');
+            if (typeof fbq !== 'undefined') {
+                fbq('track', 'Purchase', { value: orderTotal, currency: 'BRL', num_items: 1, content_ids: ['solare-luminaria'], content_type: 'product' });
+                fbq('trackCustom', 'PurchaseNewClient', { value: orderTotal, currency: 'BRL' });
+                fbq('trackCustom', 'PurchasePix', { value: orderTotal, currency: 'BRL' });
+            }
+            if (typeof ttq !== 'undefined') {
+                ttq.track('Purchase', { contents: [{ content_id: 'solare-luminaria', content_type: 'product', content_name: 'Luminária Solar Solare' }], value: orderTotal, currency: 'BRL' });
+            }
+            gtag('event', 'conversion', {
+                'send_to': 'AW-17714329725/033BCIzz6JwcEP3w7P5B',
+                'value': orderTotal,
+                'currency': 'BRL',
+                'transaction_id': paymentId
+            });
+        }
+    }
+    // Cartão: NÃO dispara aqui — já foi disparado em checkout.html antes do redirect
+
+    if (isUpsell) {
+        document.getElementById('status-title').innerText = 'Oferta Adicionada com Sucesso!';
+        document.getElementById('status-desc').innerText = 'Parabéns pela escolha! Seu pedido completo foi atualizado e será enviado em breve.';
+    }
+
+    if (type === 'pix' && status === 'pending') {
+        document.getElementById('status-icon').className = 'icon pending';
+        document.getElementById('status-icon').innerHTML = '<i class="fas fa-clock"></i>';
+        document.getElementById('status-title').innerText = 'Aguardando Pagamento';
+        document.getElementById('status-desc').innerText = 'Para finalizar, pague o Pix abaixo:';
+        document.getElementById('pix-area').style.display = 'block';
+        document.getElementById('qr-img').src = pixImg
+            ? (pixImg.startsWith('data:') ? pixImg : 'data:image/png;base64,' + pixImg)
+            : '';
+        document.getElementById('pix-code').innerText = pixCode;
+
+        // Iniciar polling para Pix
+        if (paymentId) {
+            startPixPolling(paymentId);
+        }
+
+        // Iniciar cronômetro de 10 minutos
+        startCountdown();
+    } else if (status === 'rejected') {
+        document.getElementById('status-icon').className = 'icon failure';
+        document.getElementById('status-icon').innerHTML = '<i class="fas fa-times-circle"></i>';
+        document.getElementById('status-title').innerText = 'Pagamento Recusado';
+        document.getElementById('status-desc').innerText = 'Não foi possível processar seu cartão. Tente novamente.';
+    }
+
+    function startCountdown() {
+        let seconds = 600; // 10 minutes
+        const display = document.getElementById('countdown-display');
+        const banner = document.getElementById('urgency-banner');
+        const msg = document.getElementById('urgency-msg');
+        const expiredMsg = document.getElementById('pix-expired-msg');
+
+        const tick = setInterval(() => {
+            seconds--;
+
+            const m = Math.floor(seconds / 60);
+            const s = seconds % 60;
+            display.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+
+            if (seconds <= 120 && seconds > 0) {
+                banner.classList.add('critical');
+                msg.textContent = 'Atenção! Seu código Pix está prestes a expirar. Pague agora!';
+            }
+
+            if (seconds <= 0) {
+                clearInterval(tick);
+                banner.style.display = 'none';
+                expiredMsg.style.display = 'block';
+                document.getElementById('pix-area').querySelector('.pix-container').style.opacity = '0.4';
+                document.getElementById('pix-area').querySelector('.pix-container').style.pointerEvents = 'none';
+            }
+        }, 1000);
+    }
+
+    async function startPixPolling(id) {
+        const interval = setInterval(async () => {
+            try {
+                const reminderParam   = reminderId   ? `&reminder_id=${encodeURIComponent(reminderId)}`       : '';
+                const reminder2hParam = reminder2hId ? `&reminder_2h_id=${encodeURIComponent(reminder2hId)}` : '';
+                const reminder4hParam = reminder4hId ? `&reminder_4h_id=${encodeURIComponent(reminder4hId)}` : '';
+                const res = await fetch(`/api/check-payment-status?payment_id=${id}${reminderParam}${reminder2hParam}${reminder4hParam}`);
+                const data = await res.json();
+
+                if (data.status === 'approved') {
+                    clearInterval(interval);
+                    if (shouldOfferUpsell()) {
+                        goToPixUpsell();
+                    } else {
+                        showSuccess();
+                    }
+                }
+            } catch (e) {
+                console.error('Erro polling:', e);
+            }
+        }, 5000); // Check every 5 seconds
+    }
+
+    // Upsell após Pix aprovado: só para o produto da home, e uma única vez por pedido
+    function shouldOfferUpsell() {
+        if (productType !== 'solar' || !orderId) return false;
+        try { return !localStorage.getItem('upsell_offered_' + orderId); } catch (e) { return true; }
+    }
+
+    function goToPixUpsell() {
+        try { localStorage.setItem('upsell_offered_' + orderId, '1'); } catch (e) {}
+        document.getElementById('urgency-banner').style.display = 'none';
+        document.getElementById('pix-area').style.display = 'none';
+        document.getElementById('status-icon').className = 'icon success';
+        document.getElementById('status-icon').innerHTML = '<i class="fas fa-check-circle"></i>';
+        document.getElementById('status-title').innerText = 'Pix Confirmado!';
+        document.getElementById('status-desc').innerText = 'Só um instante, liberando uma condição especial para você...';
+        setTimeout(function () {
+            window.location.href = '/upsell-pix.html?orderId=' + encodeURIComponent(orderId);
+        }, 1200);
+    }
+
+    function showSuccess() {
+        document.getElementById('urgency-banner').style.display = 'none';
+        document.getElementById('pix-area').style.display = 'none';
+        document.getElementById('status-icon').className = 'icon success';
+        document.getElementById('status-icon').innerHTML = '<i class="fas fa-check-circle"></i>';
+        document.getElementById('status-title').innerText = 'Pagamento Confirmado!';
+        document.getElementById('status-desc').innerText = 'Recebemos o seu Pix. Sua Solare já está sendo preparada!';
+    }
+
+    function copyPix() {
+        navigator.clipboard.writeText(pixCode).then(() => {
+            alert('Código Pix copiado!');
+        });
+    }
+</script>
+
+</body>
+</html>
