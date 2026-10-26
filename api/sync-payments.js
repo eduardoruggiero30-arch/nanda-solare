@@ -17,14 +17,6 @@ const MP_STATUS_MAP = {
   pending:    'pending',
 };
 
-const PB_STATUS_MAP = {
-  PAID:        'approved',
-  DECLINED:    'rejected',
-  CANCELED:    'cancelled',
-  IN_ANALYSIS: 'pending',
-  WAITING:     'pending',
-};
-
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -52,28 +44,12 @@ export default async function handler(req, res) {
       let newStatus = null;
 
       try {
-        // PagBank orders/charges
-        if (pid?.startsWith('ORDE_') || pid?.startsWith('CHAR_')) {
-          const endpoint = pid.startsWith('ORDE_')
-            ? `https://api.pagseguro.com/orders/${pid}`
-            : `https://api.pagseguro.com/charges/${pid}`;
-          const r = await fetch(endpoint, {
-            headers: { 'Authorization': `Bearer ${process.env.PAGBANK_TOKEN}`, 'Accept': 'application/json' },
-          });
-          if (r.ok) {
-            const d = await r.json();
-            const pbStatus = d.charges?.[0]?.status || d.qr_codes?.[0]?.status || d.status;
-            newStatus = PB_STATUS_MAP[pbStatus] || null;
-          }
-        } else {
-          // Mercado Pago (payment IDs numéricos)
-          const r = await fetch(`https://api.mercadopago.com/v1/payments/${pid}`, {
-            headers: { 'Authorization': `Bearer ${process.env.MP_ACCESS_TOKEN}` },
-          });
-          if (r.ok) {
-            const d = await r.json();
-            newStatus = MP_STATUS_MAP[d.status] || null;
-          }
+        const r = await fetch(`https://api.mercadopago.com/v1/payments/${pid}`, {
+          headers: { 'Authorization': `Bearer ${process.env.MP_ACCESS_TOKEN}` },
+        });
+        if (r.ok) {
+          const d = await r.json();
+          newStatus = MP_STATUS_MAP[d.status] || null;
         }
 
         if (newStatus && newStatus !== 'pending') {
