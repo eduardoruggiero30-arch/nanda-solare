@@ -48,10 +48,6 @@ CREATE INDEX IF NOT EXISTS idx_orders_status           ON orders (status);
 CREATE INDEX IF NOT EXISTS idx_orders_customer_email   ON orders (customer_email);
 
 -- Enable Row Level Security
+-- Sem policies: só a service_role (backend) acessa, pois ela ignora RLS.
+-- Uma policy USING (true) liberaria os pedidos para a chave anon.
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
-
--- Service role (backend) can do everything
-CREATE POLICY "Service role full access"
-  ON orders
-  USING (true)
-  WITH CHECK (true);
