@@ -415,7 +415,8 @@ nav a {
 
 .buy-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    /* minmax(0, …): o carrossel de depoimentos não pode alargar a coluna */
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 40px;
     align-items: start;
 }
