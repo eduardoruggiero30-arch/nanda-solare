@@ -43,7 +43,7 @@ function selectVariant(element, type) {
         const val = element.getAttribute('data-value');
         currentSelectedLight = val;
         if (val === 'warm') {
-            updateMainImage('luminaria-warm.jpg', document.querySelector('.thumb:nth-child(1)'));
+            updateMainImage('luminaria-capa.jpg', document.querySelector('.thumb:nth-child(1)'));
         } else {
             updateMainImage('luminaria-white.jpg', document.querySelector('.thumb:nth-child(2)'));
         }
