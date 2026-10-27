@@ -5,7 +5,7 @@ import { sendMetaEvent } from '../lib/meta-capi.js';
 import { sendWhatsApp } from '../lib/whatsapp.js';
 import { isValidOrderTotal } from '../lib/order-pricing.js';
 import {
-  STATEMENT_DESCRIPTOR, buildItems, buildPayerInfo, clientIp, paymentDescription,
+  STATEMENT_DESCRIPTOR, buildItems, buildPayerInfo, clientIp,
 } from '../lib/mp-payment-info.js';
 
 const supabase = createClient(
@@ -100,21 +100,22 @@ export default async function handler(req, res) {
     const { payer, additionalPayer, shipments, firstName, lastName } = buildPayerInfo({
       name: customerName, email: customerEmail, cpf: cpfDigits, phone: customerPhone, address: customerAddress,
     });
+    const items = buildItems({
+      productType: type,
+      quantity:    parsedQty,
+      total:       parsedTotal,
+      bumps:       orderBumps || {},
+      bumpPrices:  BUMP_PRICES_SERVER,
+      bumpUnits:   type === 'led' ? 3 : 2,
+    });
     const paymentBody = {
       transaction_amount: parsedTotal,
-      description: paymentDescription(type, parsedQty),
+      description: items[0].title,
       notification_url: `${process.env.SITE_URL}/api/mp-webhook`,
       external_reference: internalOrderId,
       statement_descriptor: STATEMENT_DESCRIPTOR,
       additional_info: {
-        items: buildItems({
-          productType: type,
-          quantity:    parsedQty,
-          total:       parsedTotal,
-          bumps:       orderBumps || {},
-          bumpPrices:  BUMP_PRICES_SERVER,
-          bumpUnits:   type === 'led' ? 3 : 2,
-        }),
+        items,
         payer: additionalPayer,
         shipments,
         ip_address: clientIp(req),
