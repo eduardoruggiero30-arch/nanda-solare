@@ -129,9 +129,9 @@ window.updatePricing = function(qty, price, oldPrice, element) {
     if (discountBadge) discountBadge.innerText = `↓ ${discountPercent}%`;
     if (savingsBadge) savingsBadge.innerText = `${savings.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} de desconto`;
     
-    // Pix Calculation (5% OFF)
+    // Pix Calculation (3% OFF)
     if (pixDisplay) {
-        const pixPrice = price * 0.95;
+        const pixPrice = price * 0.97;
         pixDisplay.innerText = pixPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
@@ -191,7 +191,7 @@ function applyKitPricing() {
     if (discountBadge) discountBadge.innerText = `↓ ${discountPercent}%`;
     if (savingsBadge) savingsBadge.innerText = `${savings.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} de desconto`;
     if (pixDisplay) {
-        const pixPrice = totalPrice * 0.95;
+        const pixPrice = totalPrice * 0.97;
         pixDisplay.innerText = pixPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
     const dropdown = document.getElementById('installments-dropdown');
