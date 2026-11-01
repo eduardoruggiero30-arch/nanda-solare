@@ -183,18 +183,19 @@
             if (typeof ttq !== 'undefined') {
                 ttq.track('Purchase', { contents: [{ content_id: 'solare-luminaria', content_type: 'product', content_name: 'Luminária Solar Solare' }], value: orderTotal, currency: 'BRL' });
             }
-            // Conversão "Compra" do Google Ads (nunca interfere na página)
-            try {
-                if (typeof gtag === 'function') {
-                    gtag('event', 'conversion', {
-                        'send_to': 'AW-18550802230/NiS4CNy5nLAdELaO241F',
-                        'value': orderTotal,
-                        'currency': 'BRL',
-                        'transaction_id': String(paymentId)
-                    });
-                }
-            } catch (_) {}
         }
+        // Conversão "Compra" do Google Ads: dispara a cada abertura da página
+        // (o Google descarta repetições pelo transaction_id). Nunca interfere na página.
+        try {
+            if (typeof gtag === 'function') {
+                gtag('event', 'conversion', {
+                    'send_to': 'AW-18550802230/NiS4CNy5nLAdELaO241F',
+                    'value': orderTotal,
+                    'currency': 'BRL',
+                    'transaction_id': String(paymentId)
+                });
+            }
+        } catch (_) {}
     }
     // Cartão: NÃO dispara aqui — já foi disparado em checkout.html antes do redirect
 
