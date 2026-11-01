@@ -1621,6 +1621,21 @@
         return REJECTION_MESSAGES[detail] || fallback;
     }
 
+    // Conversão "Compra" do Google Ads. Nunca interfere no pagamento:
+    // sem gtag ou com qualquer erro, simplesmente não envia.
+    function trackGoogleSale(value, transactionId) {
+        try {
+            if (typeof gtag === 'function') {
+                gtag('event', 'conversion', {
+                    'send_to': 'AW-18550802230/NiS4CNy5nLAdELaO241F',
+                    'value': value,
+                    'currency': 'BRL',
+                    'transaction_id': String(transactionId || '')
+                });
+            }
+        } catch (_) {}
+    }
+
     // Device ID do security.js do Mercado Pago (antifraude)
     function getDeviceId() {
         if (window.MP_DEVICE_SESSION_ID) return window.MP_DEVICE_SESSION_ID;
@@ -1790,6 +1805,7 @@
                 if (typeof ttq !== 'undefined') {
                     ttq.track('Purchase',{contents:[{content_id:'solare-luminaria',content_type:'product',content_name:'Luminária Solar Solare'}],value:total,currency:'BRL'});
                 }
+                trackGoogleSale(total, result.id);
                 // Upsell é exclusivo do produto da home (Luminária Solar)
                 const dest = (result.orderId && productType === 'solar')
                     ? `/upsell-v2.html?orderId=${result.orderId}`
@@ -1799,6 +1815,7 @@
                 alert(rejectionMessage(result.status_detail, 'Seu pagamento está em análise. Você recebe o resultado por e-mail.'));
                 window.location.href = `/obrigado.html?status=pending&id=${result.id}&type=card&total=${total}`;
             } else {
+                trackGoogleSale(total, result.id);
                 console.error('Card payment declined:', result);
                 alert(`Pagamento recusado.\n${rejectionMessage(result.status_detail, result.error || 'Verifique os dados ou o limite do cartão.')}`);
             }
